@@ -4,3 +4,5 @@
 out
 gen
 target
+# maven-shade-plugin 生成的精简 POM，不入库
+dependency-reduced-pom.xml

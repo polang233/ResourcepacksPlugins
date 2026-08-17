@@ -6,6 +6,10 @@
   "authors": ["Phoenix616"],
   "dependencies": [
     {
+      "id": "velocitytoolbox",
+      "optional": true
+    },
+    {
       "id": "viaversion",
       "optional": true
     },

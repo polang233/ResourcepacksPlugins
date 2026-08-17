@@ -17,8 +17,8 @@
     </parent>
 
     <properties>
-        <maven.compiler.target>21</maven.compiler.target>
-        <maven.compiler.source>21</maven.compiler.source>
+        <!-- Velocity 4 要求 Java 21 -->
+        <maven.compiler.release>21</maven.compiler.release>
     </properties>
 
     <repositories>
@@ -48,7 +48,8 @@
         <dependency>
             <groupId>com.velocitypowered</groupId>
             <artifactId>velocity-api</artifactId>
-            <version>3.3.0-SNAPSHOT</version>
+            <!-- 本 fork 目标：Velocity 4.1（Adventure 5） -->
+            <version>4.1.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -97,6 +98,7 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <!-- 1.7.6+ 不再实现 sealed TextFormat，避免 Velocity 4 / Adventure 5 崩溃 -->
             <groupId>de.themoep</groupId>
             <artifactId>minedown-adventure</artifactId>
             <scope>compile</scope>

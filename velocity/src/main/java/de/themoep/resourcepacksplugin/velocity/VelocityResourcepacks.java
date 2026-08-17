@@ -136,13 +136,15 @@ public class VelocityResourcepacks implements ResourcepacksPlugin, Languaged {
             Class.forName("org.spongepowered.configurate.ConfigurationNode");
         } catch (ClassNotFoundException e) {
             ProxyVersion version = getProxy().getVersion();
-            log(Level.SEVERE, "\nYou are running an outdated version of Velocity! Update to at least Velocity 3.3.0!\n");
+            // 本 fork 面向 Velocity 4（Adventure 5 / Java 21）
+            log(Level.SEVERE, "\nYou are running an outdated version of Velocity! Update to at least Velocity 4.0.0!\n");
             log(Level.SEVERE, getName() + " " + getVersion() + " is not compatible with " + version.getName() + " " + version.getVersion() + "!\n");
             log(Level.SEVERE, "Disabling plugin!");
             return;
         }
         boolean firstStart = !getDataFolder().exists();
 
+        // velocity-plugin.json 将 velocitytoolbox 标为 optional，让 pack-host 先于本插件启动
         messageChannelHandler = new PluginMessageListener(this);
 
         if (!loadConfig()) {
@@ -256,8 +258,12 @@ public class VelocityResourcepacks implements ResourcepacksPlugin, Languaged {
     }
 
     protected void registerCommand(PluginCommandExecutor executor) {
+        // Velocity 4：CommandMeta 必须绑定插件实例
         getProxy().getCommandManager().register(
-                getProxy().getCommandManager().metaBuilder(executor.getName()).aliases(executor.getAliases()).build(),
+                getProxy().getCommandManager().metaBuilder(executor.getName())
+                        .aliases(executor.getAliases())
+                        .plugin(this)
+                        .build(),
                 new ForwardingCommand(executor)
         );
     }
