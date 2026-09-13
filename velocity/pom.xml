@@ -17,7 +17,8 @@
     </parent>
 
     <properties>
-        <maven.compiler.release>21</maven.compiler.release>
+        <!-- Current velocity-api 4.1.0-SNAPSHOT is published as Java 25 class files. -->
+        <maven.compiler.release>25</maven.compiler.release>
     </properties>
 
     <repositories>
