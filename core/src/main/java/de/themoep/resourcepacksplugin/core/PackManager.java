@@ -1353,6 +1353,33 @@ public class PackManager {
     }
 
     private boolean generateHash(ResourcepacksPlayer sender, ResourcePack pack, ResourcePack packToCache) {
+        // Hash from a local zip when present so we do not need to download the pack URL.
+        Path localPath = pack.getLocalPath() != null && !pack.getLocalPath().isEmpty()
+                ? Paths.get(pack.getLocalPath()) : null;
+        if (localPath != null) {
+            if (Files.isRegularFile(localPath)) {
+                try {
+                    plugin.sendMessage(sender, "generate-hashes.downloading",
+                            "pack", pack.getName(),
+                            "url", localPath.toString(),
+                            "hash", pack.getHash()
+                    );
+                    return applyGeneratedHash(sender, pack, packToCache, Files.readAllBytes(localPath));
+                } catch (IOException e) {
+                    plugin.sendMessage(sender, Level.SEVERE, "generate-hashes.failed-to-load-pack",
+                            "pack", pack.getName(),
+                            "url", localPath.toString(),
+                            "hash", pack.getHash(),
+                            "error", e.getClass().getSimpleName() + ": " + e.getMessage()
+                    );
+                    plugin.getPluginLogger().log(Level.WARNING, "IO error while trying to generate hash of pack " + pack.getName() + " from local path " + localPath, e);
+                    return false;
+                }
+            }
+            plugin.getPluginLogger().log(Level.WARNING, "local-path for pack " + pack.getName()
+                    + " is not a file: " + localPath + ". Falling back to URL hash generation.");
+        }
+
         boolean changed = false;
         Path target = new File(plugin.getDataFolder(), pack.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "_") + "-downloaded.zip").toPath();
         InputStream in = null;
@@ -1368,18 +1395,7 @@ public class PackManager {
             in = con.getInputStream();
             Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
 
-            byte[] hash = Hashing.sha1().hashBytes(Files.readAllBytes(target)).asBytes();
-            if (!Arrays.equals(pack.getRawHash(), hash)) {
-                packHashes.remove(pack.getHash());
-                pack.setRawHash(hash);
-                packHashes.put(pack.getHash(), packToCache);
-                changed = true;
-            }
-            plugin.sendMessage(sender, "generate-hashes.hash-sum",
-                    "pack", pack.getName(),
-                    "url", pack.getUrl(),
-                    "hash", pack.getHash()
-            );
+            changed = applyGeneratedHash(sender, pack, packToCache, Files.readAllBytes(target));
             Files.deleteIfExists(target);
         } catch (MalformedURLException e) {
             plugin.sendMessage(sender, Level.SEVERE, "generate-hashes.invalid-url",
@@ -1412,6 +1428,26 @@ public class PackManager {
                 }
             }
         }
+        return changed;
+    }
+
+    /**
+     * Update the pack hash cache from zip bytes. Shared by local-file and URL download paths.
+     */
+    private boolean applyGeneratedHash(ResourcepacksPlayer sender, ResourcePack pack, ResourcePack packToCache, byte[] packBytes) {
+        boolean changed = false;
+        byte[] hash = Hashing.sha1().hashBytes(packBytes).asBytes();
+        if (!Arrays.equals(pack.getRawHash(), hash)) {
+            packHashes.remove(pack.getHash());
+            pack.setRawHash(hash);
+            packHashes.put(pack.getHash(), packToCache);
+            changed = true;
+        }
+        plugin.sendMessage(sender, "generate-hashes.hash-sum",
+                "pack", pack.getName(),
+                "url", pack.getUrl(),
+                "hash", pack.getHash()
+        );
         return changed;
     }
 

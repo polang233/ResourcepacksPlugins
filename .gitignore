@@ -4,3 +4,5 @@
 out
 gen
 target
+# maven-shade-plugin reduced POM; do not commit
+dependency-reduced-pom.xml
