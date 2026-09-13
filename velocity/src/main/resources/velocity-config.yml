@@ -31,6 +31,8 @@ packs:
     # if not correct the client will waste bandwidth but it will still work!
     # At least that's what the Minecraft wiki says... (Site: Server.properties#Minecraft_server_properties)
     hash: abcdef012345678abcdef012345678abcdef0123
+    # Local zip on the proxy, used only to calculate the hash. Players never download this path.
+    #local-path: plugins/SomePlugin/packs/lobbyresourcepack.zip
     # The UUID of the pack, if not set then it will be generated from the name
     uuid: 01234567-89ab-cdef-0123-456789abcdef
     # The format version of this resourcepack

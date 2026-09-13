@@ -21,7 +21,6 @@ package de.themoep.resourcepacksplugin.velocity.listeners;
 import com.google.common.collect.*;
 import com.velocitypowered.api.event.AwaitingEventExecutor;
 import com.velocitypowered.api.event.EventTask;
-import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.PlayerResourcePackStatusEvent;
@@ -157,14 +156,16 @@ public class ServerSwitchListener {
         }
     }
 
-    @Subscribe(order = PostOrder.FIRST)
+    // Velocity 4: Subscribe.priority replaces PostOrder.FIRST (Short.MAX_VALUE - 1; higher runs earlier).
+    @Subscribe(priority = Short.MAX_VALUE - 1)
     public void onPackStatusFirst(PlayerResourcePackStatusEvent event) {
         if (!event.getStatus().isIntermediate() && event.getPackId() != null) {
             alreadyAppliedPacks.put(event.getPlayer().getUniqueId(), event.getPackId());
         }
     }
 
-    @Subscribe(order = PostOrder.LAST)
+    // Velocity 4: Subscribe.priority replaces PostOrder.LAST (Short.MIN_VALUE + 1; higher runs earlier).
+    @Subscribe(priority = Short.MIN_VALUE + 1)
     public void onPackStatusLast(PlayerResourcePackStatusEvent event) {
         if (!event.getStatus().isIntermediate()) {
             CompletableFuture<Boolean> future = playersLoadingPacks.remove(event.getPlayer().getUniqueId(), event.getPackId());
